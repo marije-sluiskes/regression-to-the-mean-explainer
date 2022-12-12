@@ -7,6 +7,124 @@ author: Marije Sluiskes
 
 ## What is regression to the mean?
 
+
+
 ## Why is it relevant in the context of biological age prediction?
 
-## Example 
+Cross-sectional blabla
+
+## Example with simulated data 
+
+```{r, message = F}
+library(gbm)
+library(ggplot2)
+```
+
+Consider a training data set of size $n = 10,000$. Assume the model $Y = \beta X + \epsilon$. In the context of cross-sectional biological age prediction, $X$ can be considered some marker of chronological age and $Y$ (some scaled version of) chronological age. 
+
+Fit two models on the training data: a simple linear regression model (LR) and a generalized boosted regression model (GBM).
+```{r, message = F, warning = F}
+set.seed(18)
+
+n=10000
+X<-rnorm(n,0,6)
+eps<-rnorm(n,0,6)
+beta=2
+
+Y<-beta*X+eps
+
+# fit models
+lr_fit <- lm(Y~X)
+gbm_fit = gbm(Y ~ X, distribution = "gaussian", n.trees = 100)
+
+# get fitted values
+lr_fitted <- fitted(lr_fit)
+gbm_fitted<-predict.gbm(gbm_fit,as.data.frame(X))
+```
+
+Now plot the residuals ($\hat{Y} - Y$) against $Y$. For both models there is already a downward sloping pattern visible: this is regression to the mean. People with higher chronological ages (higher $Y$) on average have lower predicted chronological ages (lower $\hat{Y}$). The lower the correlation between $X$ and $Y$, the stronger this effect. 
+```{r}
+df_fitted <- data.frame(Y, lr_fitted, gbm_fitted)
+
+ggplot(aes(x = Y, y = lr_fitted - Y), data = df_fitted) +
+  geom_abline(intercept = 0, slope = 0, col = "blue") + 
+  geom_point() + 
+  labs(title = "Linear regression model", y = "Predicted Y - Y") +
+  theme_bw()
+
+ggplot(aes(x = Y, y = gbm_fitted - Y), data = df_fitted) +
+  geom_abline(intercept = 0, slope = 0, col = "blue") + 
+  geom_point() + 
+  labs(title = "Generalized boosting regression model", y = "Predicted Y - Y") +
+  theme_bw()
+```
+
+Consider now a test set, sampled from the same population. Split the test set in two groups, based on their value for $Y$. This would be similar to comparing groups from the general population defined by their chronological age (e.g., old / long-lived individuals with young individuals from the same population).
+
+Use the models fitted on the training data to obtain predictions for $Y$ for the two groups. Now compare the values of the residuals between these two groups. 
+```{r, message = F, warning = F}
+set.seed(22)
+
+nval=10000
+x.val<-rnorm(nval,0,6)
+y.val<-sapply(1:nval,function(i)beta*x.val[i]+rnorm(1,0,6))
+
+#Long-lived group
+y.val1<-y.val[y.val>0]
+x.val1<-x.val[y.val>0]
+
+#General population group
+y.val0<-y.val[y.val<0]
+x.val0<-x.val[y.val<0]
+
+# MLR 
+y.pred.val1<-sapply(1:length(x.val1),function(i)coef(lr_fit)[1]+coef(lr_fit)[2]*x.val1[i])
+y.pred.val0<-sapply(1:length(x.val0),function(i)coef(lr_fit)[1]+coef(lr_fit)[2]*x.val0[i])
+
+mlr.res1<-y.val1-y.pred.val1
+mlr.res0<-y.val0-y.pred.val0
+
+# GBM
+y.predmatrix.val1 <-predict.gbm(gbm_fit, data.frame(X = x.val1))
+y.predmatrix.val0 <-predict.gbm(gbm_fit, data.frame(X = x.val0))
+
+gbm.res1<-y.val1-y.predmatrix.val1
+gbm.res0<-y.val0-y.predmatrix.val0
+```
+
+Now compare the values of the residuals between these two groups. Ideally, they should be similarly distributed and centered around zero: after all, the random noise distribution is the same for the two groups, namely a normal distribution with mean 0. However, due to the regression to the mean phenomenon, those with a value for $Y$ that is higher than the sample mean on average receive a value for $\hat{Y}$ that is lower than $Y$, and those with a value for $Y$ that is lower than the sample mean on average receive a value for $\hat{Y}$ that is higher than $Y$. 
+
+When using a t-test to compare the difference in the mean of the residuals between the two groups, a significant difference is detected. This holds for both models. 
+
+```{r}
+dftest_res0 <- data.frame(mlr.res0, gbm.res0)
+dftest_res1 <- data.frame(mlr.res1, gbm.res1)
+```
+
+```{r}
+t.test(mlr.res1,mlr.res0)
+
+ggplot(aes(x = mlr.res0), data = dftest_res0) +
+  geom_density(aes(col = "darkgreen")) +
+  geom_density(aes(x = mlr.res1, col = "purple"), data = dftest_res1) + 
+  labs(title = "Linear regression model", x = "residual") +
+  theme_bw() +
+  scale_colour_identity(guide = "legend", 
+                        name = "legend",
+                        labels = c("young group", "old group"))
+```
+
+```{r}
+t.test(gbm.res1,gbm.res0)
+
+ggplot(aes(x = gbm.res0), data = dftest_res0) +
+  geom_density(aes(col = "darkgreen")) +
+  geom_density(aes(x = mlr.res1, col = "purple"), data = dftest_res1) + 
+  labs(title = "Generalized boosting regression model", x = "residual") +
+  theme_bw() +
+  scale_colour_identity(guide = "legend", 
+                        name = "legend",
+                        labels = c("young group", "old group"))
+```
+
+This simple simulated scenario illustrates that it is not valid to interpret differences between true and predicted chronological age as an indication of biological aging when comparing groups defined by their chronological age. All cross-sectional age clocks will have a tendency to overestimate the age of younger individuals and underestimate the age of older individuals. This cannot be interpreted as a sign of accelerated or decelerated biological aging. 
