@@ -1,14 +1,9 @@
----
-title: "Regression to the mean in biological age prediction"
-author: "Marije Sluiskes"
-date: "12-12-2022"
-output: 
-  html_document:
-    keep_md: true
----
+Marije Sluiskes
 
-# What is regression to the mean?
+# Regression to the mean in biological age prediction
 
-# Why is it relevant in the context of biological age prediction?
+## What is regression to the mean?
 
-# Example 
+## Why is it relevant in the context of biological age prediction?
+
+## Example
