@@ -3,17 +3,28 @@ output: rmarkdown::github_document
 author: Marije Sluiskes
 ---
 
-# Regression to the mean in biological age prediction
+# Regression to the sample's mean age in biological age prediction
 
 ## What is regression to the mean?
 
+Regression to the mean is a statistical phenomenon that occurs whenever two variables of interest are imperfectly correlated. Let's call these variables $X$ and $Y$. On average, when a measurement of $X$ deviates from the mean of this variable, the corresponding measurement of $Y$ will be closer to its mean. This occurs whenever the correlation coefficient between $X$ and $Y$ is smaller than one. 
+
+It is easiest to understand this phenomenon by considering two extreme cases. Assume that $X$ and $Y$ are normally distributed with mean $\mu$ and standard deviation $\sigma$. (This is just for simplicity of the subsequent formulas, but if not met, they can be adjusted without loss of generality.) Denote the correlation coefficient between $X$ and $Y$ by $r$. 
+
+Now, for a given subject $i$, draw measurement $x_i$ from $X$. The expected value for measurement $y_i$ is then $\mu + r(x_i - \mu)$. If there is a perfect correlation between  $X$ and $Y$ (i.e. $r = 1$), $E[y_i] = x_i$. If they are completely independent, $E[y_i] = \mu$.
+
+In reality, for any $X$ and $Y$, $r$ will often be somewhere in between these two extreme cases. Hence, if you select subjects with extreme measurements of $X$, the average of the measurements for $Y$ for these subjects will be closer to the mean. 
 
 
 ## Why is it relevant in the context of biological age prediction?
 
-Cross-sectional blabla
+A commonly used approach to predict biological age is to perform multiple linear regression on cross-sectional data: chronological age $C$ is taken as the outcome variable and regressed on a set of markers $X$ that were measured at the same point in time as chronological age (i.e., a cross-sectional set-up). Then the model's predicted chronological age is considered to be informative of one's biological aging $B$: $\hat{B} = \hat{C} = \beta_0 + \sum_{i = 1}^{m}\beta_ix_i$, where $m$ denotes the number of included markers. In other words, the residuals (the differences between $C$ and $\hat{C}$) are interpreted as meaningful quantities in their own right. 
 
-## Example with simulated data 
+The correlation between chronological age and the markers will not be perfect. There is a (significant) source of random error. Hence, there will be regression to the mean: predicted values for $C$ will tend to regress toward the sample's mean chronological age. **Individuals younger than this sample mean age will obtain predicted ages that are on average too high, and individuals older than this mean age will receive predicted ages that are too low.** This phenomenon has been recognized to be an issue in the context of cross-sectional biological age prediction for decades: see e.g. [Dubina et al. (1984)](https://www.sciencedirect.com/science/article/pii/0531556584900160) or [Hochschild (1989)](https://www.sciencedirect.com/science/article/pii/0531556589900028). 
+
+Though this phenomenon has primarily been discussed in the context of (multiple) linear regression, it also holds for other types of regression models using cross-sectional data to predict chronological/biological age. In the example below, both a linear regression model and a boosted regression model are used to illustrate this. 
+
+## Illustration with simulated data 
 
 ```{r, message = F}
 library(gbm)
@@ -26,23 +37,25 @@ Fit two models on the training data: a simple linear regression model (LR) and a
 ```{r, message = F, warning = F}
 set.seed(18)
 
-n=10000
-X<-rnorm(n,0,6)
-eps<-rnorm(n,0,6)
-beta=2
+n = 10000
+X <- rnorm(n,0,6)
+eps <- rnorm(n,0,6)
+beta = 2
 
-Y<-beta*X+eps
+Y <- beta*X + eps
 
 # fit models
-lr_fit <- lm(Y~X)
+lr_fit <- lm(Y ~ X)
 gbm_fit = gbm(Y ~ X, distribution = "gaussian", n.trees = 100)
+
+summary(lr_fit)
 
 # get fitted values
 lr_fitted <- fitted(lr_fit)
 gbm_fitted<-predict.gbm(gbm_fit,as.data.frame(X))
 ```
 
-Now plot the residuals ($\hat{Y} - Y$) against $Y$. For both models there is already a downward sloping pattern visible: this is regression to the mean. People with higher chronological ages (higher $Y$) on average have lower predicted chronological ages (lower $\hat{Y}$). The lower the correlation between $X$ and $Y$, the stronger this effect. 
+Now plot the residuals ($\hat{Y} - Y$) against $Y$. For both models there is a downward sloping pattern visible: people with higher chronological ages (higher $Y$) on average have lower predicted chronological ages (lower $\hat{Y}$). The lower the correlation between $X$ and $Y$, the stronger this effect. 
 ```{r}
 df_fitted <- data.frame(Y, lr_fitted, gbm_fitted)
 
@@ -81,15 +94,15 @@ x.val0<-x.val[y.val<0]
 y.pred.val1<-sapply(1:length(x.val1),function(i)coef(lr_fit)[1]+coef(lr_fit)[2]*x.val1[i])
 y.pred.val0<-sapply(1:length(x.val0),function(i)coef(lr_fit)[1]+coef(lr_fit)[2]*x.val0[i])
 
-mlr.res1<-y.val1-y.pred.val1
-mlr.res0<-y.val0-y.pred.val0
+mlr.res1<-y.pred.val1-y.val1
+mlr.res0<-y.pred.val0-y.val0
 
 # GBM
 y.predmatrix.val1 <-predict.gbm(gbm_fit, data.frame(X = x.val1))
 y.predmatrix.val0 <-predict.gbm(gbm_fit, data.frame(X = x.val0))
 
-gbm.res1<-y.val1-y.predmatrix.val1
-gbm.res0<-y.val0-y.predmatrix.val0
+gbm.res1<-y.predmatrix.val1-y.val1
+gbm.res0<-y.predmatrix.val0-y.val0
 ```
 
 Now compare the values of the residuals between these two groups. Ideally, they should be similarly distributed and centered around zero: after all, the random noise distribution is the same for the two groups, namely a normal distribution with mean 0. However, due to the regression to the mean phenomenon, those with a value for $Y$ that is higher than the sample mean on average receive a value for $\hat{Y}$ that is lower than $Y$, and those with a value for $Y$ that is lower than the sample mean on average receive a value for $\hat{Y}$ that is higher than $Y$. 
