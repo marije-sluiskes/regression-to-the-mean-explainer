@@ -2,6 +2,16 @@ Marije Sluiskes
 
 # Regression to the sample’s mean age in biological age prediction
 
+The goal of this document is to show why the phenomenon of *regression
+to the mean* is relevant when predicting biological age, and how it can
+lead to invalid conclusions when it is ignored. This document first
+introduces the concept of regression to the mean. It is explained why
+this unavoidable phenomenon is especially relevant in the context of
+biological age prediction. Finally, with artificially created data it is
+shown how this phenomenon can lead to wrong conclusions when
+interpreting the difference between true and predicted chronological age
+as an indication of accelerated/decelerated biological aging.
+
 ## What is regression to the mean?
 
 Regression to the mean is a statistical phenomenon that occurs whenever
@@ -97,9 +107,9 @@ perfect. There is a (significant) source of random error. Hence, there
 will be regression to the mean: predicted values for
 ![C](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;C "C")
 will tend to regress toward the sample’s mean chronological age.
-*Individuals younger than this sample mean age will obtain predicted
+**Individuals younger than this sample mean age will obtain predicted
 ages that are on average too high, and individuals older than this mean
-age will receive predicted ages that are too low.* This phenomenon has
+age will receive predicted ages that are too low.** This phenomenon has
 been recognized to be an issue in the context of cross-sectional
 biological age prediction for decades: see e.g. [Dubina et
 al. (1984)](https://www.sciencedirect.com/science/article/pii/0531556584900160)
@@ -124,11 +134,11 @@ Consider a training data set of size
 ![n = 10,000](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;n%20%3D%2010%2C000 "n = 10,000").
 Assume the model
 ![Y = \\beta X + \\epsilon](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;Y%20%3D%20%5Cbeta%20X%20%2B%20%5Cepsilon "Y = \beta X + \epsilon").
-In the context of cross-sectional biological age prediction,
+(In the context of cross-sectional biological age prediction,
 ![X](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;X "X")
 can be considered some marker of chronological age and
 ![Y](https://latex.codecogs.com/png.image?%5Cdpi%7B110%7D&space;%5Cbg_white&space;Y "Y")
-(some scaled version of) chronological age.
+(some scaled version of) chronological age.)
 
 Fit two models on the training data: a simple linear regression model
 (LR) and a generalized boosted regression model (GBM).
