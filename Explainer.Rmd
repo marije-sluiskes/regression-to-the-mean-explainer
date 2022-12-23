@@ -5,6 +5,9 @@ author: Marije Sluiskes
 
 # Regression to the sample's mean age in biological age prediction
 
+The goal of this document is to show why the phenomenon of *regression to the mean* is relevant when predicting biological age, and how it can lead to invalid conclusions when it is ignored. This document first introduces the concept of regression to the mean. It is explained why this unavoidable phenomenon is especially relevant in the context of biological age prediction. Finally, with artificially created data it is shown how this phenomenon can lead to wrong conclusions when interpreting the difference between true and predicted chronological age as an indication of accelerated/decelerated biological aging. 
+
+
 ## What is regression to the mean?
 
 Regression to the mean is a statistical phenomenon that occurs whenever two variables of interest are imperfectly correlated. Let's call these variables $X$ and $Y$. On average, when a measurement of $X$ deviates from the mean of this variable, the corresponding measurement of $Y$ will be closer to its mean. This occurs whenever the correlation coefficient between $X$ and $Y$ is smaller than one. 
