@@ -5,7 +5,7 @@ author: Marije Sluiskes
 
 # Regression to the sample's mean age in biological age prediction
 
-The goal of this document is to show why the phenomenon of *regression to the mean* is relevant when predicting biological age, and how it can lead to invalid conclusions when it is ignored. This document first introduces the concept of regression to the mean. It is explained why this unavoidable phenomenon is especially relevant in the context of biological age prediction. Finally, with artificially created data it is shown how this phenomenon can lead to wrong conclusions when interpreting the difference between true and predicted chronological age as an indication of accelerated/decelerated biological aging. 
+The goal of this document is to show why the phenomenon of [*regression toward the mean*](https://en.wikipedia.org/wiki/Regression_toward_the_mean) is relevant when predicting biological age, and how it can lead to invalid conclusions when it is ignored. This document first introduces the concept of regression to the mean. It is explained why this unavoidable phenomenon is especially relevant in the context of biological age prediction. Finally, with artificially created data it is shown how this phenomenon can lead to wrong conclusions when interpreting the difference between true and predicted chronological age as an indication of accelerated/decelerated biological aging. 
 
 
 ## What is regression to the mean?
@@ -121,8 +121,8 @@ dftest_res1 <- data.frame(mlr.res1, gbm.res1)
 t.test(mlr.res1,mlr.res0)
 
 ggplot(aes(x = mlr.res0), data = dftest_res0) +
-  geom_density(aes(col = "darkgreen")) +
-  geom_density(aes(x = mlr.res1, col = "purple"), data = dftest_res1) + 
+  geom_density(aes(col = "forestgreen"), size = 1.5) +
+  geom_density(aes(x = mlr.res1, col = "purple"), size = 1.5, data = dftest_res1) + 
   labs(title = "Linear regression model", x = "residual") +
   theme_bw() +
   scale_colour_identity(guide = "legend", 
@@ -134,8 +134,8 @@ ggplot(aes(x = mlr.res0), data = dftest_res0) +
 t.test(gbm.res1,gbm.res0)
 
 ggplot(aes(x = gbm.res0), data = dftest_res0) +
-  geom_density(aes(col = "darkgreen")) +
-  geom_density(aes(x = mlr.res1, col = "purple"), data = dftest_res1) + 
+  geom_density(aes(col = "forestgreen"),  size = 1.5) +
+  geom_density(aes(x = mlr.res1, col = "purple"),  size = 1.5, data = dftest_res1) + 
   labs(title = "Generalized boosting regression model", x = "residual") +
   theme_bw() +
   scale_colour_identity(guide = "legend", 
