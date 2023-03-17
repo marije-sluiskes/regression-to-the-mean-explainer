@@ -25,7 +25,7 @@ A commonly used approach to predict biological age is to perform multiple linear
 
 The correlation between chronological age and the markers will not be perfect. There is a (significant) source of random error. Hence, there will be regression to the mean: predicted values for $C$ will tend to regress toward the sample's mean chronological age. **Individuals younger than this sample mean age will obtain predicted ages that are on average too high, and individuals older than this mean age will receive predicted ages that are too low.** This phenomenon has been recognized to be an issue in the context of cross-sectional biological age prediction for decades: see e.g. [Dubina et al. (1984)](https://www.sciencedirect.com/science/article/pii/0531556584900160) or [Hochschild (1989)](https://www.sciencedirect.com/science/article/pii/0531556589900028). 
 
-Though this phenomenon has primarily been discussed in the context of (multiple) linear regression, it also holds for other types of regression models using cross-sectional data to predict chronological/biological age. In the example below, both a linear regression model and a boosted regression model are used to illustrate this. 
+Although this phenomenon has primarily been discussed in the context of (multiple) linear regression, it also holds for other types of regression models using cross-sectional data to predict chronological/biological age. In the example below, both a linear regression model and a boosted regression model are used to illustrate this. 
 
 ## Illustration with simulated data 
 
